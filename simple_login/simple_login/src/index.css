@@ -1,0 +1,20 @@
+:root {
+    --font-family: "Inter", "sans-serif";
+    --primary-colour: ;
+    --secondary-colour: ;
+    --accent-colour: ;
+
+    --bg-colour: #0d0d0d;
+    --bg-box-colour: #1a1a1a;
+    --button-colour: #262626;
+    --button-hover-colour: #333333;
+    --text-colour: #e6e6e6;
+    --text-muted: #b3b3b3;
+
+
+    font-family: var(--font-family);
+}
+
+body {
+    margin: 0;
+}

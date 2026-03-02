@@ -15,15 +15,13 @@ function Login() {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({username, password}),
+                credentials: "include"
             });
 
             if (!res.ok) {
                 throw new Error("Sign up failed");
             }
 
-            const data = await res.json()
-            // console.log(data)
-            localStorage.setItem("token", data.token);
             navigate("/dashboard")
             console.log("login successful");
         } catch (err) {

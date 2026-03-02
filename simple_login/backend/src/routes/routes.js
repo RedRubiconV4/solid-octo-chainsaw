@@ -8,24 +8,45 @@ import pool from '../schema/db.js'
 const JWT_SECRET_KEY = process.env.JWT_SECRET
 const router = Router()
 
-// const user = {
-//     email: "test@example.com",
-//     password: "password123"
-// }
-
-// router.get("/api/test", (req, res) => {
-//     console.log("testing");
-//     res.status(201).json({message: "response sent back to front-end"});
-// })
-
 const usertasklist = [
     {id: 1, task: "Eat breakfast", completed: false},
     {id: 2, task: "Study", completed: false},
     {id: 3, task: "Gym", completed: false},
 ]
 
-router.get("/getTaskList", (req, res) => {
-    res.status(201).json(usertasklist);
+router.get("/me", async (req, res) => {
+    try {
+        const token = req.cookies.accessToken;
+
+        if (!token) {
+            return res.status(401).json({message: "Not authenicated"});
+        }
+
+        const decoded = jwt.verify(token, JWT_SECRET_KEY);
+
+        res.status(200).json({user: decoded});
+    } catch (err) {
+        return res.status(401).json({message: "Invalid or expired token"});
+    }
+
+})
+
+router.get("/getTaskList", async (req, res) => {
+    const token = req.cookies.accessToken;
+
+    if (!token) {
+        return res.status(401).json({error: 'Not authorised - no token'});
+    }
+
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET_KEY);
+        const taskData = await pool.query("SELECT * FROM tasks WHERE user_id = $1", [decoded.userId])
+        const tasks = taskData.rows;
+
+        res.status(201).json({message: 'Task list', user: decoded, tasks: tasks});
+    } catch (err) {
+        res.status(401).json({error: 'Invalid/expired token'});
+    }
 })
 
 router.post("/login", async (req, res) => {
@@ -55,7 +76,14 @@ router.post("/login", async (req, res) => {
         }
 
         const token = jwt.sign({userId: user.id}, JWT_SECRET_KEY, {expiresIn: "24h"});
-        res.status(200).json({token});
+        res.cookie('accessToken', token, {
+            httpOnly: true,
+            secure: false, // true for https only
+            sameSite: 'strict',
+            maxAge: 15 * 60 * 1000,
+            // path: '/' // Not sure to give root accessToken?
+        });
+        res.status(200).json({message: "Login successful", user: {id: user.id, username: user.username}});
     } catch(err) {
         console.log(err.message)
         return res.sendStatus(503);
@@ -75,6 +103,7 @@ router.post("/signup", async (req, res) => {
         if (!username || !password) {
             return res.status(400).send({message: "Username and password must not be empty"});
         }
+        console.log("username", username);
 
         const checkExistingUser = await pool.query("SELECT username FROM users WHERE username = $1", [username]);
         if (checkExistingUser.rowCount > 0) {
@@ -85,16 +114,23 @@ router.post("/signup", async (req, res) => {
         const result = await pool.query('INSERT INTO users (username, password) VALUES ($1, $2) RETURNING *', [username, hashedPassword]);
         // console.log(result);
         const user = result.rows[0];
-        // console.log(user);
+        const taskName = "Your first tasks"
+        const insertTask = await pool.query('INSERT INTO tasks (task, user_id) VALUES ($1, $2) RETURNING *', [taskName, user.id]);
         const token = jwt.sign({userId: user.id}, JWT_SECRET_KEY, {expiresIn: "24h"});
+        res.cookie('accessToken', token, {
+            httpOnly: true,
+            secure: false, // true for https only
+            sameSite: 'strict',
+            maxAge: 15 * 60 * 1000,
+            // path: '/'
+        });
 
         return res.status(201).json({
             message: 'Account successfully created', 
             user: {
                 id: user.id,
                 username: user.username,
-            },
-            token: token
+            }
         });
     } catch(err) {
         if (err instanceof z.ZodError) {

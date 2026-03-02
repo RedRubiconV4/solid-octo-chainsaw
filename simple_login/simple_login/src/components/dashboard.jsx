@@ -8,10 +8,11 @@ function Dashboard() {
     const getTaskList = async () => {
         try {
             const res = await fetch("http://localhost:5000/api/getTaskList", {
-                method: "GET"
+                method: "GET",
+                credentials: "include"
             })
             const tasklist = await res.json();
-            setTaskArray(tasklist);
+            setTaskArray(tasklist.tasks);
             
         } catch (err) {
             console.log("unable to get task list");

@@ -21,9 +21,6 @@ function SignUp() {
                 throw new Error("Sign up failed");
             }
 
-            const data = await res.json()
-            // console.log(data)
-            localStorage.setItem("token", data.token);
             navigate("/dashboard")
             console.log("login successful");
         } catch (err) {

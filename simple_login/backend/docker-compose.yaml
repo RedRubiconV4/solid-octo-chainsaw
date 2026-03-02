@@ -5,7 +5,7 @@ services:
     build: .
     container_name: todo-app
     environment:
-      - Database_URL=postgresql://postgres:postgres@db:5432/todoapp
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/todoapp
       - JWT_SECRET=secret_jwt_key
       - NODE_ENV=development
       - PORT=5000
@@ -20,13 +20,14 @@ services:
   db:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: user123
-      POSTGRES_PASSWORD: password123
-      POSTGRES_DB: db123
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: todoapp
     ports:
       - "5432:5432"
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - ./init:/docker-entrypoint-initdb.d
+      # - postgres-data:/var/lib/postgresql/data
 
 volumes:
   postgres-data:

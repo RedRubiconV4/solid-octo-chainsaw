@@ -14,5 +14,6 @@ Database: Postgresql
 To run this use:
 ```
 cd simple_login/backend
-docker compose up --build
+docker compose up -d --build
+docker compose exec todo-app npx prisma migrate dev
 ```

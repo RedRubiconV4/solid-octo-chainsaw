@@ -129,7 +129,7 @@
     transform: rotate(45deg);
 }
 
-.checkbox:checked + label {
+.taskCompleted {
     text-decoration: line-through;
     color: var(--text-muted);
 }
@@ -153,4 +153,19 @@
     font-size: 16px;
     font-weight: 500;
     margin: 10px 30px;
+}
+
+.sidebar__logout {
+    margin-top: auto;
+    margin-bottom: 40px;
+    height: 40px;
+    width: 140px;
+    background-color: var(--button-colour);
+    border-radius: 8px;
+    border: 1px solid var(--text-colour);
+}
+
+.sidebar__logout:hover {
+    background-color: var(--button-hover-colour);
+    border: 1px solid var(--text-muted);
 }
